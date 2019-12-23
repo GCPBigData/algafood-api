@@ -27,6 +27,10 @@ public class CadastroCozinhaService {
 		} catch (EmptyResultDataAccessException e) {
 			throw new EntidadeNaoEncontradaException(
 				String.format("Não existe um cadastro de cozinha com código %d", cozinhaId));
+			
+			//outra forma seria assim: Porém, não é interessante tratar códigos HTTP no Service
+//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+//					String.format("Não existe um cadastro de cozinha com código %d", cozinhaId));
 		
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
