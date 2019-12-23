@@ -233,6 +233,20 @@ A estrutura de arquivos está da seguinte maneira:
 56 directories, 103 files
 ```
 
+# Instalando o plugin do Lombok
+Link: https://projectlombok.org/download
+
+
+## Para fazer um dump (backup dos dados) do database "algafood" no MySQL, use o seguinte comando:
+```sh
+mysqldump --host localhost --user root --password --databases algafood > dump.sql
+```
+## Para criar o database "algafood" a partir do dump, execute o comando:
+
+```sh
+mysql --host localhost --user root --password < dump.sql
+```
+
 #### Executando a Instância do MySql no Docker 
 
 Para iniciar o MySql, basta rodar o comando abaixo (O Docker precisa estar instalado): 
