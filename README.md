@@ -65,6 +65,64 @@ Para reproduzir o exemplo, é necessário seguir os requisitos mínimos.
  - Instalando o Docker no Linux: (Youtube: LinuxTips)
  - Instalando o Docker no Mac: (Youtube: Wellington Rogati)
 
+
+#Documentação do Bean Validator
+
+https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-builtin-constraints
+
+Dica 1: 
+```java
+@NotBlank - Trata Strings Nulas, Vazias e/ou com espaços em branco
+
+Dica 2: 
+```
+Validação na variável do Path 
+
+```java
+Para validar o tipo PathVariable: 
+ 1 - Anotar o seu controller com @Validated.
+2 - Adicionar a validação antes da variável.
+
+@GetMapping("/{id}")
+public ResponseEntity<?> obter(@PathVariable @Size(max = 99) Long id) {
+//...
+}
+```
+Dica 3: Para validar em cascata, é necessário adicionar a anotação @Valid no objeto do relacionamento.
+
+Dica 4: 
+
+Você pode criar grupos de validação. (Exemplo: Id não é obrigatório na inclusão, porém é obrigatório na edição)
+
+```java
+@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Restaurante adicionar(
+			@RequestBody @Validated(Groups.CadastroRestaurante.class) Restaurante restaurante) {
+
+		try {
+			return cadastroRestaurante.salvar(restaurante);
+```
+Dica 5: Para simplificar, é possível utilizar o ConvertGroup
+
+Dica 6: 
+ A validação ocorre primeiro no message.properties, depois do ValidationsMessage.properties (do Validator)
+```java
+Restaurante.java
+
+@Valid
+	@ConvertGroup(from = Default.class, to = Groups.CozinhaId.class)
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "cozinha_id", nullable = false)
+	private Cozinha cozinha
+
+```
+
+# Testes de Integração: 
+
+para executar os testes de integraçao: mvn verify
+
 ### Estrutura de Arquivos
 
 A estrutura de arquivos está da seguinte maneira:
@@ -75,155 +133,155 @@ A estrutura de arquivos está da seguinte maneira:
 ├── mvnw.cmd
 ├── pom.xml
 ├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com
-│   │   │       └── algaworks
-│   │   │           └── algafood
-│   │   │               ├── AlgafoodApiApplication.java
-│   │   │               ├── api
-│   │   │               │   └── controller
-│   │   │               │       ├── CidadeController.java
-│   │   │               │       ├── CozinhaController.java
-│   │   │               │       ├── EstadoController.java
-│   │   │               │       ├── RestauranteController.java
-│   │   │               │       └── TesteController.java
-│   │   │               ├── domain
-│   │   │               │   ├── exception
-│   │   │               │   │   ├── EntidadeEmUsoException.java
-│   │   │               │   │   └── EntidadeNaoEncontradaException.java
-│   │   │               │   ├── model
-│   │   │               │   │   ├── Cidade.java
-│   │   │               │   │   ├── Cozinha.java
-│   │   │               │   │   ├── Endereco.java
-│   │   │               │   │   ├── Estado.java
-│   │   │               │   │   ├── FormaPagamento.java
-│   │   │               │   │   ├── Grupo.java
-│   │   │               │   │   ├── ItemPedido.java
-│   │   │               │   │   ├── Pedido.java
-│   │   │               │   │   ├── Permissao.java
-│   │   │               │   │   ├── Produto.java
-│   │   │               │   │   ├── Restaurante.java
-│   │   │               │   │   ├── StatusPedido.java
-│   │   │               │   │   └── Usuario.java
-│   │   │               │   ├── repository
-│   │   │               │   │   ├── CidadeRepository.java
-│   │   │               │   │   ├── CozinhaRepository.java
-│   │   │               │   │   ├── CustomJpaRepository.java
-│   │   │               │   │   ├── EstadoRepository.java
-│   │   │               │   │   ├── FormaPagamentoRepository.java
-│   │   │               │   │   ├── PermissaoRepository.java
-│   │   │               │   │   ├── RestauranteRepository.java
-│   │   │               │   │   └── RestauranteRepositoryQueries.java
-│   │   │               │   └── service
-│   │   │               │       ├── CadastroCidadeService.java
-│   │   │               │       ├── CadastroCozinhaService.java
-│   │   │               │       ├── CadastroEstadoService.java
-│   │   │               │       └── CadastroRestauranteService.java
-│   │   │               └── infrastructure
-│   │   │                   └── repository
-│   │   │                       ├── CustomJpaRepositoryImpl.java
-│   │   │                       ├── RestauranteRepositoryImpl.java
-│   │   │                       └── spec
-│   │   │                           └── RestauranteSpecs.java
-│   │   └── resources
-│   │       ├── META-INF
-│   │       │   └── orm.xml
-│   │       ├── application.properties
-│   │       ├── db
-│   │       │   ├── migration
-│   │       │   │   ├── V001__criacao-inicial.sql
-│   │       │   │   ├── V002__cria-tabela-cidade.sql
-│   │       │   │   ├── V003__cria-tabela-estado.sql
-│   │       │   │   ├── V004__cria-varias-tabelas.sql
-│   │       │   │   ├── V005__cria-tabela-teste.sql
-│   │       │   │   ├── V006__remove-tabela-teste.sql
-│   │       │   │   └── V007__cria-tabelas-pedido-item-pedido.sql
-│   │       │   └── testdata
-│   │       │       └── afterMigrate.sql
-│   │       └── flyway.properties
-│   └── test
-│       └── java
-│           └── com
-│               └── algaworks
-│                   └── algafood
-│                       └── AlgafoodApiApplicationTests.java
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── algaworks
+│   │   │           └── algafood
+│   │   │               ├── AlgafoodApiApplication.java
+│   │   │               ├── api
+│   │   │               │   └── controller
+│   │   │               │       ├── CidadeController.java
+│   │   │               │       ├── CozinhaController.java
+│   │   │               │       ├── EstadoController.java
+│   │   │               │       ├── RestauranteController.java
+│   │   │               │       └── TesteController.java
+│   │   │               ├── domain
+│   │   │               │   ├── exception
+│   │   │               │   │   ├── EntidadeEmUsoException.java
+│   │   │               │   │   └── EntidadeNaoEncontradaException.java
+│   │   │               │   ├── model
+│   │   │               │   │   ├── Cidade.java
+│   │   │               │   │   ├── Cozinha.java
+│   │   │               │   │   ├── Endereco.java
+│   │   │               │   │   ├── Estado.java
+│   │   │               │   │   ├── FormaPagamento.java
+│   │   │               │   │   ├── Grupo.java
+│   │   │               │   │   ├── ItemPedido.java
+│   │   │               │   │   ├── Pedido.java
+│   │   │               │   │   ├── Permissao.java
+│   │   │               │   │   ├── Produto.java
+│   │   │               │   │   ├── Restaurante.java
+│   │   │               │   │   ├── StatusPedido.java
+│   │   │               │   │   └── Usuario.java
+│   │   │               │   ├── repository
+│   │   │               │   │   ├── CidadeRepository.java
+│   │   │               │   │   ├── CozinhaRepository.java
+│   │   │               │   │   ├── CustomJpaRepository.java
+│   │   │               │   │   ├── EstadoRepository.java
+│   │   │               │   │   ├── FormaPagamentoRepository.java
+│   │   │               │   │   ├── PermissaoRepository.java
+│   │   │               │   │   ├── RestauranteRepository.java
+│   │   │               │   │   └── RestauranteRepositoryQueries.java
+│   │   │               │   └── service
+│   │   │               │       ├── CadastroCidadeService.java
+│   │   │               │       ├── CadastroCozinhaService.java
+│   │   │               │       ├── CadastroEstadoService.java
+│   │   │               │       └── CadastroRestauranteService.java
+│   │   │               └── infrastructure
+│   │   │                   └── repository
+│   │   │                       ├── CustomJpaRepositoryImpl.java
+│   │   │                       ├── RestauranteRepositoryImpl.java
+│   │   │                       └── spec
+│   │   │                           └── RestauranteSpecs.java
+│   │   └── resources
+│   │       ├── META-INF
+│   │       │   └── orm.xml
+│   │       ├── application.properties
+│   │       ├── db
+│   │       │   ├── migration
+│   │       │   │   ├── V001__criacao-inicial.sql
+│   │       │   │   ├── V002__cria-tabela-cidade.sql
+│   │       │   │   ├── V003__cria-tabela-estado.sql
+│   │       │   │   ├── V004__cria-varias-tabelas.sql
+│   │       │   │   ├── V005__cria-tabela-teste.sql
+│   │       │   │   ├── V006__remove-tabela-teste.sql
+│   │       │   │   └── V007__cria-tabelas-pedido-item-pedido.sql
+│   │       │   └── testdata
+│   │       │       └── afterMigrate.sql
+│   │       └── flyway.properties
+│   └── test
+│       └── java
+│           └── com
+│               └── algaworks
+│                   └── algafood
+│                       └── AlgafoodApiApplicationTests.java
 └── target
     ├── classes
-    │   ├── META-INF
-    │   │   ├── MANIFEST.MF
-    │   │   ├── maven
-    │   │   │   └── com.algaworks
-    │   │   │       └── algafood-api
-    │   │   │           ├── pom.properties
-    │   │   │           └── pom.xml
-    │   │   └── orm.xml
-    │   ├── application.properties
-    │   ├── com
-    │   │   └── algaworks
-    │   │       └── algafood
-    │   │           ├── AlgafoodApiApplication.class
-    │   │           ├── api
-    │   │           │   └── controller
-    │   │           │       ├── CidadeController.class
-    │   │           │       ├── CozinhaController.class
-    │   │           │       ├── EstadoController.class
-    │   │           │       ├── RestauranteController.class
-    │   │           │       └── TesteController.class
-    │   │           ├── domain
-    │   │           │   ├── exception
-    │   │           │   │   ├── EntidadeEmUsoException.class
-    │   │           │   │   └── EntidadeNaoEncontradaException.class
-    │   │           │   ├── model
-    │   │           │   │   ├── Cidade.class
-    │   │           │   │   ├── Cozinha.class
-    │   │           │   │   ├── Endereco.class
-    │   │           │   │   ├── Estado.class
-    │   │           │   │   ├── FormaPagamento.class
-    │   │           │   │   ├── Grupo.class
-    │   │           │   │   ├── ItemPedido.class
-    │   │           │   │   ├── Pedido.class
-    │   │           │   │   ├── Permissao.class
-    │   │           │   │   ├── Produto.class
-    │   │           │   │   ├── Restaurante.class
-    │   │           │   │   ├── StatusPedido.class
-    │   │           │   │   └── Usuario.class
-    │   │           │   ├── repository
-    │   │           │   │   ├── CidadeRepository.class
-    │   │           │   │   ├── CozinhaRepository.class
-    │   │           │   │   ├── CustomJpaRepository.class
-    │   │           │   │   ├── EstadoRepository.class
-    │   │           │   │   ├── FormaPagamentoRepository.class
-    │   │           │   │   ├── PermissaoRepository.class
-    │   │           │   │   ├── RestauranteRepository.class
-    │   │           │   │   └── RestauranteRepositoryQueries.class
-    │   │           │   └── service
-    │   │           │       ├── CadastroCidadeService.class
-    │   │           │       ├── CadastroCozinhaService.class
-    │   │           │       ├── CadastroEstadoService.class
-    │   │           │       └── CadastroRestauranteService.class
-    │   │           └── infrastructure
-    │   │               └── repository
-    │   │                   ├── CustomJpaRepositoryImpl.class
-    │   │                   ├── RestauranteRepositoryImpl.class
-    │   │                   └── spec
-    │   │                       └── RestauranteSpecs.class
-    │   ├── db
-    │   │   ├── migration
-    │   │   │   ├── V001__criacao-inicial.sql
-    │   │   │   ├── V002__cria-tabela-cidade.sql
-    │   │   │   ├── V003__cria-tabela-estado.sql
-    │   │   │   ├── V004__cria-varias-tabelas.sql
-    │   │   │   ├── V005__cria-tabela-teste.sql
-    │   │   │   ├── V006__remove-tabela-teste.sql
-    │   │   │   └── V007__cria-tabelas-pedido-item-pedido.sql
-    │   │   └── testdata
-    │   │       └── afterMigrate.sql
-    │   └── flyway.properties
+    │   ├── META-INF
+    │   │   ├── MANIFEST.MF
+    │   │   ├── maven
+    │   │   │   └── com.algaworks
+    │   │   │       └── algafood-api
+    │   │   │           ├── pom.properties
+    │   │   │           └── pom.xml
+    │   │   └── orm.xml
+    │   ├── application.properties
+    │   ├── com
+    │   │   └── algaworks
+    │   │       └── algafood
+    │   │           ├── AlgafoodApiApplication.class
+    │   │           ├── api
+    │   │           │   └── controller
+    │   │           │       ├── CidadeController.class
+    │   │           │       ├── CozinhaController.class
+    │   │           │       ├── EstadoController.class
+    │   │           │       ├── RestauranteController.class
+    │   │           │       └── TesteController.class
+    │   │           ├── domain
+    │   │           │   ├── exception
+    │   │           │   │   ├── EntidadeEmUsoException.class
+    │   │           │   │   └── EntidadeNaoEncontradaException.class
+    │   │           │   ├── model
+    │   │           │   │   ├── Cidade.class
+    │   │           │   │   ├── Cozinha.class
+    │   │           │   │   ├── Endereco.class
+    │   │           │   │   ├── Estado.class
+    │   │           │   │   ├── FormaPagamento.class
+    │   │           │   │   ├── Grupo.class
+    │   │           │   │   ├── ItemPedido.class
+    │   │           │   │   ├── Pedido.class
+    │   │           │   │   ├── Permissao.class
+    │   │           │   │   ├── Produto.class
+    │   │           │   │   ├── Restaurante.class
+    │   │           │   │   ├── StatusPedido.class
+    │   │           │   │   └── Usuario.class
+    │   │           │   ├── repository
+    │   │           │   │   ├── CidadeRepository.class
+    │   │           │   │   ├── CozinhaRepository.class
+    │   │           │   │   ├── CustomJpaRepository.class
+    │   │           │   │   ├── EstadoRepository.class
+    │   │           │   │   ├── FormaPagamentoRepository.class
+    │   │           │   │   ├── PermissaoRepository.class
+    │   │           │   │   ├── RestauranteRepository.class
+    │   │           │   │   └── RestauranteRepositoryQueries.class
+    │   │           │   └── service
+    │   │           │       ├── CadastroCidadeService.class
+    │   │           │       ├── CadastroCozinhaService.class
+    │   │           │       ├── CadastroEstadoService.class
+    │   │           │       └── CadastroRestauranteService.class
+    │   │           └── infrastructure
+    │   │               └── repository
+    │   │                   ├── CustomJpaRepositoryImpl.class
+    │   │                   ├── RestauranteRepositoryImpl.class
+    │   │                   └── spec
+    │   │                       └── RestauranteSpecs.class
+    │   ├── db
+    │   │   ├── migration
+    │   │   │   ├── V001__criacao-inicial.sql
+    │   │   │   ├── V002__cria-tabela-cidade.sql
+    │   │   │   ├── V003__cria-tabela-estado.sql
+    │   │   │   ├── V004__cria-varias-tabelas.sql
+    │   │   │   ├── V005__cria-tabela-teste.sql
+    │   │   │   ├── V006__remove-tabela-teste.sql
+    │   │   │   └── V007__cria-tabelas-pedido-item-pedido.sql
+    │   │   └── testdata
+    │   │       └── afterMigrate.sql
+    │   └── flyway.properties
     ├── generated-sources
-    │   └── annotations
+    │   └── annotations
     ├── generated-test-sources
-    │   └── test-annotations
+    │   └── test-annotations
     └── test-classes
         └── com
             └── algaworks
@@ -252,7 +310,7 @@ mysql --host localhost --user root --password < dump.sql
 Para iniciar o MySql, basta rodar o comando abaixo (O Docker precisa estar instalado): 
 
 ```sh
-docker run --name algafood-mysql -v /Users/marcus/Developer/Database_Docker/MySQL:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql
+docker run --name algafood-mysql -it -v ~/Developer/Database_Docker/MySQL:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 -d mysql
 ```
 
 <!-- CONTRIBUTING -->
